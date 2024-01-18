@@ -5,7 +5,12 @@ import (
 
 	"time"
 
+	"github.com/deveusss/evergram-core/config"
+	"github.com/deveusss/evergram-core/encryption"
+	pbAuth "github.com/deveusss/evergram-identity/proto/auth"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gorm.io/gorm"
 )
 
@@ -83,4 +88,29 @@ func (user *Account) BeforeCreate(*gorm.DB) error {
 	user.ID = NewAccountId()
 
 	return nil
+}
+func GenerateToken(name string, email string, accountId uuid.UUID, secret encryption.ISecureString) (string, *pbAuth.TokenClaims, error) {
+	tokenClaims := &pbAuth.TokenClaims{
+		AccountId: accountId.String(),
+		Name:      name,
+		Email:     email,
+		Exp:       timestamppb.New(time.Now().Add(time.Second * time.Duration(config.Config().Auth.JwtExpiration))),
+	}
+
+	// Create the token with claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"accountId": tokenClaims.AccountId,
+		"username":  tokenClaims.Name,
+		"email":     tokenClaims.Email,
+		"exp":       tokenClaims.Exp.AsTime().Unix(),
+	})
+
+	// Generate the token string
+	tokenString, err := token.SignedString(secret.Get())
+	if err != nil {
+		return "", nil, err
+	}
+
+	// Return the token string and error
+	return tokenString, tokenClaims, nil
 }

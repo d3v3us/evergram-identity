@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  identity:
+    image: golang:latest
+    container_name: evergram-identity
+    volumes:
+      - "./:/evergram-identity"
+    working_dir: /evergram-identity
+    command: go run cmd/main.go
+    env_file:
+        - .env
+    ports:
+        - "127.0.0.1:8081:8081"

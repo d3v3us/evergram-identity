@@ -10,7 +10,7 @@ endif
 
 .PHONY: build
 build:
-	@go build ./cmd/main/
+	@go build -o /dev/null ./cmd
 
 .PHONY: fmt
 fmt:

@@ -8,10 +8,8 @@ import (
 
 	"github.com/deveusss/evergram-identity/internal/account"
 	pbAuth "github.com/deveusss/evergram-identity/proto/auth"
-	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/deveusss/evergram-core/config"
 	"github.com/deveusss/evergram-core/encryption"
 
 	"net/mail"
@@ -62,7 +60,7 @@ func (s *AuthService) AuthenticateUser(ctx context.Context, req *pbAuth.AuthRequ
 	}
 
 	// Generate and return the JWT token
-	token, claims, err := generateToken(user.Name, user.Email, user.ID, s.secretKey)
+	token, claims, err := account.GenerateToken(user.Name, user.Email, user.ID, s.secretKey)
 	if err != nil {
 		return Failed(), err
 	}
@@ -96,32 +94,6 @@ func (s *AuthService) ValidateToken(ctx context.Context, req *pbAuth.ValidateTok
 		Email:     claims["email"].(string),
 		Exp:       timestamppb.New(time.Unix(int64(claims["exp"].(float64)), 0)),
 	}, nil
-}
-
-func generateToken(name string, email string, accountId uuid.UUID, secret encryption.ISecureString) (string, *pbAuth.TokenClaims, error) {
-	tokenClaims := &pbAuth.TokenClaims{
-		AccountId: accountId.String(),
-		Name:      name,
-		Email:     email,
-		Exp:       timestamppb.New(time.Now().Add(time.Second * time.Duration(config.Config().Auth.JwtExpiration))),
-	}
-
-	// Create the token with claims
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"accountId": tokenClaims.AccountId,
-		"username":  tokenClaims.Name,
-		"email":     tokenClaims.Email,
-		"exp":       tokenClaims.Exp.AsTime().Unix(),
-	})
-
-	// Generate the token string
-	tokenString, err := token.SignedString(secret.Get())
-	if err != nil {
-		return "", nil, err
-	}
-
-	// Return the token string and error
-	return tokenString, tokenClaims, nil
 }
 
 func isEmail(email string) bool {
