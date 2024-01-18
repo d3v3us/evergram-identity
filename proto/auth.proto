@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+option go_package = "proto/auth";
+
+message TokenClaims{
+    string accountId=1;
+    string name = 2;
+    string email = 3;
+    string firstName = 4;
+    string lastName = 5;
+    google.protobuf.Timestamp exp = 6;
+}
+message AuthRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  string token = 1;
+  bool authenticated = 2;
+  TokenClaims claims = 3;
+}
+message ValidateTokenRequest {
+    string token = 1;
+  }
+  
+// Define the AuthService service with an authentication method
+
+service AuthService {
+  // Method to authenticate a user
+  rpc AuthenticateUser(AuthRequest) returns (AuthResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (TokenClaims);
+}
