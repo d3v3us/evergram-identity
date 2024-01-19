@@ -5,7 +5,6 @@ import (
 
 	"time"
 
-	"github.com/deveusss/evergram-core/config"
 	"github.com/deveusss/evergram-core/encryption"
 	pbAuth "github.com/deveusss/evergram-identity/proto/auth"
 	"github.com/golang-jwt/jwt/v5"
@@ -89,12 +88,12 @@ func (user *Account) BeforeCreate(*gorm.DB) error {
 
 	return nil
 }
-func GenerateToken(name string, email string, accountId uuid.UUID, secret encryption.ISecureString) (string, *pbAuth.TokenClaims, error) {
+func GenerateToken(name string, email string, accountId uuid.UUID, secret encryption.ISecureString, exp time.Duration) (string, *pbAuth.TokenClaims, error) {
 	tokenClaims := &pbAuth.TokenClaims{
 		AccountId: accountId.String(),
 		Name:      name,
 		Email:     email,
-		Exp:       timestamppb.New(time.Now().Add(time.Second * time.Duration(config.Config().Auth.JwtExpiration))),
+		Exp:       timestamppb.New(time.Now().Add(time.Hour * exp)),
 	}
 
 	// Create the token with claims

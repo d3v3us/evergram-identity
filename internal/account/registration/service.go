@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/deveusss/evergram-core/caching"
+	"github.com/deveusss/evergram-core/config"
 	"github.com/deveusss/evergram-core/encryption"
 
 	"golang.org/x/crypto/bcrypt"
@@ -20,13 +21,17 @@ type RegistrationServiceImpl struct {
 	accountRepo *account.AccountRepository
 	cache       *caching.AppCache
 	secretKey   encryption.ISecureString // Secret key for token signing
+	config      *config.AppConfig
 }
 
-func NewRegistrationService(accountRepo *account.AccountRepository, cache *caching.AppCache, secretKey encryption.ISecureString) RegistrationService {
+func NewRegistrationService(accountRepo *account.AccountRepository, cache *caching.AppCache,
+	secretKey encryption.ISecureString,
+	config *config.AppConfig) RegistrationService {
 	return &RegistrationServiceImpl{
 		accountRepo: accountRepo,
 		cache:       cache,
 		secretKey:   secretKey,
+		config:      config,
 	}
 }
 func (s *RegistrationServiceImpl) Register(req *RegistrationRequest) (*RegistrationResult, error) {
@@ -48,7 +53,7 @@ func (s *RegistrationServiceImpl) Register(req *RegistrationRequest) (*Registrat
 	if err := s.accountRepo.Create(user); err != nil {
 		return Failed(), err
 	}
-	token, claims, err := account.GenerateToken(user.Name, user.Email, user.ID, s.secretKey)
+	token, claims, err := account.GenerateToken(user.Name, user.Email, user.ID, s.secretKey, s.config.AuthConfig.Jwt.TokenTTL)
 	if err != nil {
 		return Failed(), err
 	}

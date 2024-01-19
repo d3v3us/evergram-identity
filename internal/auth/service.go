@@ -10,6 +10,7 @@ import (
 	pbAuth "github.com/deveusss/evergram-identity/proto/auth"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/deveusss/evergram-core/config"
 	"github.com/deveusss/evergram-core/encryption"
 
 	"net/mail"
@@ -26,13 +27,15 @@ type AuthService struct {
 	cache       *caching.AppCache
 	secretKey   encryption.ISecureString // Secret key for token signing
 	pbAuth.UnimplementedAuthServiceServer
+	config *config.AppConfig
 }
 
-func NewAuthService(accountRepo *account.AccountRepository, cache *caching.AppCache, secretKey encryption.ISecureString) *AuthService {
+func NewAuthService(accountRepo *account.AccountRepository, cache *caching.AppCache, config *config.AppConfig) *AuthService {
 	return &AuthService{
 		accountRepo: accountRepo,
 		cache:       cache,
-		secretKey:   secretKey,
+		secretKey:   config.AuthConfig.Jwt.GetSecret(),
+		config:      config,
 	}
 }
 
@@ -60,7 +63,7 @@ func (s *AuthService) AuthenticateUser(ctx context.Context, req *pbAuth.AuthRequ
 	}
 
 	// Generate and return the JWT token
-	token, claims, err := account.GenerateToken(user.Name, user.Email, user.ID, s.secretKey)
+	token, claims, err := account.GenerateToken(user.Name, user.Email, user.ID, s.secretKey, s.config.AuthConfig.Jwt.TokenTTL)
 	if err != nil {
 		return Failed(), err
 	}

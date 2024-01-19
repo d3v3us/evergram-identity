@@ -20,6 +20,12 @@ message AuthResponse {
   string token = 1;
   bool authenticated = 2;
   TokenClaims claims = 3;
+  string role = 4;
+  bool IsAdmin = 5;
+  bool IsModerator = 6;
+  bool isEmailVerified = 7;
+  bool isPhoneVerified = 8;
+  bool isTwoFactorAuthEnabled = 9;
 }
 message ValidateTokenRequest {
     string token = 1;

@@ -1,0 +1,18 @@
+env: local
+grpc:
+  port: 8081
+  timeout: 5s
+db:
+  host: storage
+  port: 5432
+  user: "evergram"
+  password: "evergram"
+  name: "evergram"
+auth:
+  external:
+    google:
+      google_client_id: "159625075407-04f02ed7el1eemu54nodotu7eatsc770.apps.googleusercontent.com"
+      google_client_secret: "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"
+  jwt:
+    token_ttl: 1h
+    secret: "83ac728c-8e6c-494c-b327-2aa7aaba1fe7"
