@@ -6,7 +6,7 @@ services:
     volumes:
       - "./:/evergram-identity"
     working_dir: /evergram-identity
-    command: go run cmd/main.go
+    command: go run cmd/main.go --config "./config.yaml"
     env_file:
         - .env
     ports:

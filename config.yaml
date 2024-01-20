@@ -3,7 +3,7 @@ grpc:
   port: 8081
   timeout: 5s
 db:
-  host: storage
+  host: evergram-storage
   port: 5432
   user: "evergram"
   password: "evergram"

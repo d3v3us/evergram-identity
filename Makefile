@@ -30,8 +30,9 @@ test:
 
 .PHONY: run
 run:
+	go mod tidy
 	go mod vendor
-	docker-compose -p evergram up -d && docker-compose logs
+	docker-compose -p evergram up -d  --build && docker-compose logs -f
 
 .PHONY: restart
 restart:
